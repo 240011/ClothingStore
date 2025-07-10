@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { Heart, Star, ShoppingCart, Eye } from 'lucide-react';
 
+// Helper function to format numbers into NPR
+const formatNPR = (amount) => {
+  if (isNaN(amount)) return '';
+  return `Rs. ${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
+
 const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, isFavorite }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -59,7 +65,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, is
           alt={product.name}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        
+
         {/* Favorite Button */}
         <button
           onClick={handleFavoriteClick}
@@ -119,29 +125,19 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, is
           </p>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center space-x-1 mb-3">
-          <div className="flex space-x-1">
-            {renderStars(product.rating)}
-          </div>
-          <span className="text-sm text-gray-500">
-            ({product.reviews})
-          </span>
-        </div>
-
         {/* Price */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <span className="text-xl font-bold text-gray-900">
-              ${product.price}
+              {formatNPR(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
               <span className="text-sm text-gray-500 line-through">
-                ${product.originalPrice}
+                {formatNPR(product.originalPrice)}
               </span>
             )}
           </div>
-          
+
           {(!product.inStock || product.stock === 0) && (
             <span className="text-sm text-red-500 font-medium">
               Out of Stock

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { User, Lock, Mail, Phone, Home, X, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react"
 import axios from "axios"
-import { createUser  } from "../services/userapi"
+import { createUser  } from "../Services/userApi"
 import DataTable from "./DataTable"
 
 const Signup = () => {
@@ -137,11 +137,11 @@ const Signup = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link
-            to="/userlogin"
+            to="/"
             className="inline-flex items-center space-x-2 text-rose-600 hover:text-rose-700 mb-6 font-medium"
           >
-            <User  className="w-4 h-4" />
-            <span>Already have an account? Login</span>
+            <User className="w-4 h-4" />
+            <span>Back to Home</span>
           </Link>
         </div>
 
@@ -349,7 +349,7 @@ const Signup = () => {
              <div className="text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link to="/" className="text-rose-600 hover:text-rose-700 font-medium">
+                <Link to="/userlogin" className="text-rose-600 hover:text-rose-700 font-medium">
                   Log in
                 </Link>
               </p>

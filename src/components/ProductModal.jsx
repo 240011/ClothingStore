@@ -8,6 +8,36 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
 
   if (!isOpen || !product) return null;
 
+  // Helper function to extract numeric price from string or return number
+  const getNumericPrice = (price) => {
+    if (typeof price === 'number') return price;
+    if (typeof price === 'string') {
+      // Remove currency symbols (Rs, $, commas) and convert to number
+      const numericPrice = parseFloat(price.replace(/[Rs$,]/g, ''));
+      return isNaN(numericPrice) ? 0 : numericPrice;
+    }
+    return 0;
+  };
+
+  // Format currency in NPR (Nepalese Rupees) - Proper NPR formatting
+  const formatCurrency = (amount) => {
+    // Format with proper NPR formatting (Rs symbol with space and comma separators)
+    const formattedAmount = new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+    
+    return `Rs ${formattedAmount}`;
+  };
+
+  // Format price for display
+  const formatPrice = (price) => {
+    if (typeof price === 'string' && price.includes('Rs')) {
+      return price; // Already formatted
+    }
+    return formatCurrency(getNumericPrice(price));
+  };
+
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
       alert('Please select size and color');
@@ -73,7 +103,7 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               />
               
               {/* Sale Badge */}
-              {product.originalPrice && product.originalPrice > product.price && (
+              {product.originalPrice && getNumericPrice(product.originalPrice) > getNumericPrice(product.price) && (
                 <div className="absolute top-4 left-4 bg-rose-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                   Sale
                 </div>
@@ -92,23 +122,26 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               </div>
 
               {/* Rating */}
-              <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
-                  {renderStars(product.rating)}
+              {product.rating && (
+                <div className="flex items-center space-x-2">
+                  <div className="flex">
+                    {renderStars(product.rating)}
+                  </div>
+                  <span className="text-gray-600">({product.rating}/5)</span>
+                  {product.reviewCount && (
+                    <span className="text-gray-500">• {product.reviewCount} reviews</span>
+                  )}
                 </div>
-                <span className="text-gray-600">
-                  {product.rating} ({product.reviews} reviews)
-                </span>
-              </div>
+              )}
 
               {/* Price */}
               <div className="flex items-center space-x-3">
                 <span className="text-3xl font-bold text-gray-900">
-                  ${product.price}
+                  {formatPrice(product.price)}
                 </span>
-                {product.originalPrice && product.originalPrice > product.price && (
+                {product.originalPrice && getNumericPrice(product.originalPrice) > getNumericPrice(product.price) && (
                   <span className="text-xl text-gray-500 line-through">
-                    ${product.originalPrice}
+                    {formatPrice(product.originalPrice)}
                   </span>
                 )}
               </div>

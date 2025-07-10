@@ -60,7 +60,7 @@ const AdminDashboard = ({ onLogout }) => {
   })
 
   const [recentOrders] = useState([
-    { id: "#ORD-001", customer: "John Doe", amount: 129.99, status: "completed", date: "2024-01-15" },
+    { id: "#ORD-001", customer: "John Doe", amount: 1299, status: "completed", date: "2024-01-15" },
     { id: "#ORD-002", customer: "Jane Smith", amount: 89.5, status: "pending", date: "2024-01-15" },
     { id: "#ORD-003", customer: "Mike Johnson", amount: 199.99, status: "shipped", date: "2024-01-14" },
     { id: "#ORD-004", customer: "Sarah Wilson", amount: 75.25, status: "completed", date: "2024-01-14" },
@@ -405,7 +405,7 @@ const AdminDashboard = ({ onLogout }) => {
 
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price ($)
+              Price ()
             </label>
             <input
               type="number"

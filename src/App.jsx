@@ -8,6 +8,9 @@ import Cart from './components/Cart';
 import Productmodal from './components/ProductModal';
 import ProductCard from './components/ProductCard';
 import AdminLogin from './components/AdminLogin'; 
+import AboutUs from './components/AboutUs'; 
+import ContactUs from './components/ContactUs'; // Importing the AboutUs component
+// Importing the AboutUs component
 
 
 function App() {
@@ -23,8 +26,13 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<Productmodal />} />
           <Route path="/product-card" element={<ProductCard />} />
+          <Route path="/aboutus" element={<AboutUs />} />
+          {/* Adding the About Us route */}
+          <Route path="/contactus" element={<ContactUs />} />
+          {/* Adding the Contact Us route */}
+          {/* Add more routes as needed */}
         </Routes>
-      </div>ç
+      </div>
     </Router>
   );
 }

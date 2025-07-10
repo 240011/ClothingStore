@@ -1,9 +1,53 @@
-import { Trash2, Plus, Minus, ShoppingBag, X } from "lucide-react"
+import { Trash2, Plus, Minus, ShoppingBag, X } from "lucide-react";
 
+// Utility: Format numbers into NPR (e.g., Rs. 1,23,456)
+const formatNPR = (amount) => {
+  if (isNaN(amount)) return '';
+  return `Rs. ${new Intl.NumberFormat("en-IN").format(Math.round(amount))}`;
+};
+
+// Order Summary Component
+const OrderSummary = ({ total, tax, grandTotal, cartItems, onCheckout }) => (
+  <div className="bg-gray-50 rounded-xl p-6">
+    <h3 className="text-xl font-semibold mb-6">Order Summary</h3>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <span>Subtotal</span>
+        <span>{formatNPR(total)}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Shipping</span>
+        <span>Free</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Tax (8%)</span>
+        <span>{formatNPR(tax)}</span>
+      </div>
+      <hr />
+      <div className="flex justify-between text-xl font-bold">
+        <span>Total</span>
+        <span>{formatNPR(grandTotal)}</span>
+      </div>
+    </div>
+    <button
+      onClick={() => onCheckout(cartItems, grandTotal)}
+      className="w-full mt-6 bg-rose-600 text-white py-3 rounded-lg hover:bg-rose-700 transition-colors font-medium"
+    >
+      Proceed to Checkout
+    </button>
+    <p className="text-xs text-gray-500 text-center mt-4">
+      Secure checkout powered by Ime PAY
+    </p>
+  </div>
+);
+
+// Main Cart Component
 const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCheckout }) => {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
-  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const tax = total * 0.08;
+  const grandTotal = total + tax;
 
   if (cartItems.length === 0) {
     return (
@@ -32,7 +76,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCh
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -50,6 +94,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCh
 
         <div className="p-6">
           <div className="grid lg:grid-cols-3 gap-8">
+            {/* Cart Items */}
             <div className="lg:col-span-2">
               <div className="space-y-6">
                 {cartItems.map((item, index) => (
@@ -67,7 +112,12 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCh
                       <p className="text-sm text-gray-600">
                         Size: {item.selectedSize} | Color: {item.selectedColor}
                       </p>
-                      <p className="text-lg font-bold text-gray-900 mt-1">${item.product.price}</p>
+                      <p className="text-gray-700 mt-1 text-sm">
+                        Price: {formatNPR(item.product.price)} x {item.quantity}
+                      </p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {formatNPR(item.product.price * item.quantity)}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
@@ -96,42 +146,21 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCh
               </div>
             </div>
 
+            {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-6">Order Summary</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>Free</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>${(total * 0.08).toFixed(2)}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between text-xl font-bold">
-                    <span>Total</span>
-                    <span>${(total * 1.08).toFixed(2)}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => onCheckout(cartItems, total)}
-                  className="w-full mt-6 bg-rose-600 text-white py-3 rounded-lg hover:bg-rose-700 transition-colors font-medium"
-                >
-                  Proceed to Checkout
-                </button>
-                <p className="text-xs text-gray-500 text-center mt-4">Secure checkout powered by Stripe</p>
-              </div>
+              <OrderSummary
+                total={total}
+                tax={tax}
+                grandTotal={grandTotal}
+                cartItems={cartItems}
+                onCheckout={onCheckout}
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;
