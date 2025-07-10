@@ -6,11 +6,15 @@ import dotenv from "dotenv";
 import { authenticateToken } from "./middleware/token-middleware.js";
 import router from "./route/uploadRoutes.js";
 import { createUploadsFolder } from "./security/helper.js";
+import cors from "cors";
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
+
+// Enable CORS
+app.use(cors());
 
 // Use the port from environment variables or default to 5000
 const port = process.env.PORT || 5000;

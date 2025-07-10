@@ -4,17 +4,20 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 export const sequelize = new Sequelize(
-  process.env.postgres,
-  process.env.postgres,
-  process.env.niraj70055,
+  "trendmandu", // Database name
+  "postgres",
+  "niraj70055", // Database user
   {
-    host: process.env.localhost,
+    host: "localhost",
     dialect: 'postgres',// other example mysql,oracle,h2
   }
 );
 
 export const db = async () => {
   try {
+    await sequelize.authenticate();
+    console.log("database connected successfully")
+    
     await sequelize.sync({alter:true})
     console.log("database connected successfully")
 

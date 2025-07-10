@@ -1,82 +1,163 @@
-"use client"
+import { useState } from 'react';
+import { X, Star, Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
 
-import { useState } from "react"
-import { X, ShoppingCart, Heart, Star } from "lucide-react"
+const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, onAddToCart }) => {
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [quantity, setQuantity] = useState(1);
 
-const ProductModal = ({ product, isOpen, onClose }) => {
-  const [selectedSize, setSelectedSize] = useState("")
-  const [selectedColor, setSelectedColor] = useState("")
-  const [quantity, setQuantity] = useState(1)
+  if (!isOpen || !product) return null;
 
-  if (!isOpen || !product) return null
+  // Helper function to extract numeric price from string or return number
+  const getNumericPrice = (price) => {
+    if (typeof price === 'number') return price;
+    if (typeof price === 'string') {
+      // Remove currency symbols (Rs, $, commas) and convert to number
+      const numericPrice = parseFloat(price.replace(/[Rs$,]/g, ''));
+      return isNaN(numericPrice) ? 0 : numericPrice;
+    }
+    return 0;
+  };
+
+  // Format currency in NPR (Nepalese Rupees) - Proper NPR formatting
+  const formatCurrency = (amount) => {
+    // Format with proper NPR formatting (Rs symbol with space and comma separators)
+    const formattedAmount = new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+    
+    return `Rs ${formattedAmount}`;
+  };
+
+  // Format price for display
+  const formatPrice = (price) => {
+    if (typeof price === 'string' && price.includes('Rs')) {
+      return price; // Already formatted
+    }
+    return formatCurrency(getNumericPrice(price));
+  };
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
-      alert("Please select size and color")
-      return
+      alert('Please select size and color');
+      return;
     }
-
-    // Simple cart addition without context
-    console.log("Adding to cart:", {
+    
+    onAddToCart({
       product,
       selectedSize,
       selectedColor,
       quantity,
-    })
+    });
+    
+    onClose();
+  };
 
-    alert("Product added to cart!")
-    onClose()
-  }
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <Star key="half" className="w-4 h-4 fill-yellow-400 text-yellow-400 opacity-50" />
+      );
+    }
+
+    const remainingStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(
+        <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
+      );
+    }
+
+    return stars;
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Product Details</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <div className="relative">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
-        </div>
 
-        <div className="p-6">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
             {/* Product Image */}
-            <div className="aspect-square overflow-hidden rounded-xl">
+            <div className="relative">
               <img
-                src={product.image_url || "/placeholder.svg"}
+                src={product.image || product.image_url}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-96 lg:h-full object-cover rounded-xl"
               />
+              
+              {/* Sale Badge */}
+              {product.originalPrice && getNumericPrice(product.originalPrice) > getNumericPrice(product.price) && (
+                <div className="absolute top-4 left-4 bg-rose-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Sale
+                </div>
+              )}
             </div>
 
-            {/* Product Info */}
+            {/* Product Details */}
             <div className="space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-4 h-4 ${i < 4 ? "text-yellow-400 fill-current" : "text-gray-300"}`} />
-                    ))}
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {product.name}
+                </h1>
+                <p className="text-gray-600 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+
+              {/* Rating */}
+              {product.rating && (
+                <div className="flex items-center space-x-2">
+                  <div className="flex">
+                    {renderStars(product.rating)}
                   </div>
-                  <span className="text-sm text-gray-600">(4.0) 128 reviews</span>
+                  <span className="text-gray-600">({product.rating}/5)</span>
+                  {product.reviewCount && (
+                    <span className="text-gray-500">• {product.reviewCount} reviews</span>
+                  )}
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-4">${product.price}</p>
-                <p className="text-gray-600">{product.description}</p>
+              )}
+
+              {/* Price */}
+              <div className="flex items-center space-x-3">
+                <span className="text-3xl font-bold text-gray-900">
+                  {formatPrice(product.price)}
+                </span>
+                {product.originalPrice && getNumericPrice(product.originalPrice) > getNumericPrice(product.price) && (
+                  <span className="text-xl text-gray-500 line-through">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
               </div>
 
               {/* Size Selection */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Size</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Size</h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.size.map((size) => (
+                  {(product.sizes || product.size || []).map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
                       className={`px-4 py-2 border rounded-lg font-medium transition-colors ${
                         selectedSize === size
-                          ? "border-indigo-600 bg-indigo-50 text-indigo-600"
-                          : "border-gray-300 hover:border-gray-400"
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
                       }`}
                     >
                       {size}
@@ -87,72 +168,85 @@ const ProductModal = ({ product, isOpen, onClose }) => {
 
               {/* Color Selection */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Color</h3>
-                <div className="flex flex-wrap gap-3">
-                  {product.color.map((color) => (
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Color</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(product.colors || product.color || []).map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        selectedColor === color ? "border-indigo-600 scale-110" : "border-gray-300 hover:scale-105"
+                      className={`px-4 py-2 border rounded-lg font-medium transition-colors ${
+                        selectedColor === color
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
                       }`}
-                      style={{ backgroundColor: color.toLowerCase() }}
-                      title={color}
-                    />
+                    >
+                      {color}
+                    </button>
                   ))}
                 </div>
-                {selectedColor && <p className="text-sm text-gray-600 mt-2">Selected: {selectedColor}</p>}
               </div>
 
               {/* Quantity */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Quantity</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50"
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    -
+                    <Minus className="w-4 h-4" />
                   </button>
-                  <span className="text-lg font-medium w-8 text-center">{quantity}</span>
+                  <span className="text-xl font-semibold w-12 text-center">
+                    {quantity}
+                  </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50"
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    +
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-
-              {/* Stock Info */}
-              <div className="text-sm text-gray-600">
-                {product.stock > 0 ? (
-                  <span className="text-green-600">✓ In stock ({product.stock} available)</span>
-                ) : (
-                  <span className="text-red-600">✗ Out of stock</span>
-                )}
               </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-4">
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                  className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2 font-medium"
+                  disabled={!product.inStock || product.stock === 0}
+                  className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 ${
+                    (product.inStock && product.stock > 0)
+                      ? 'bg-rose-500 text-white hover:bg-rose-600'
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  <span>Add to Cart</span>
+                  <span>{(product.inStock && product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
                 </button>
-                <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Heart className="w-5 h-5" />
+                
+                <button
+                  onClick={() => onToggleFavorite(product)}
+                  className={`p-3 rounded-lg border transition-colors ${
+                    isFavorite
+                      ? 'border-rose-500 bg-rose-50 text-rose-500'
+                      : 'border-gray-300 text-gray-600 hover:border-gray-400'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                 </button>
               </div>
+
+              {/* Stock Status */}
+              {(product.inStock && product.stock > 0) ? (
+                <p className="text-green-600 font-medium">✓ In Stock ({product.stock} available)</p>
+              ) : (
+                <p className="text-red-600 font-medium">✗ Out of Stock</p>
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductModal
+export default ProductModal;

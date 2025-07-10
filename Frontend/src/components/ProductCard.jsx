@@ -1,75 +1,165 @@
-"use client"
+import { useState } from 'react';
+import { Heart, Star, ShoppingCart, Eye } from 'lucide-react';
 
-import { Heart, ShoppingCart } from "lucide-react"
+// Helper function to format numbers into NPR
+const formatNPR = (amount) => {
+  if (isNaN(amount)) return '';
+  return `Rs. ${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
 
-const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, isFavorite }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation();
+    onToggleFavorite(product);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    onAddToCart(product);
+  };
+
+  const handleViewDetails = () => {
+    onViewDetails(product);
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <Star key="half" className="w-4 h-4 fill-yellow-400 text-yellow-400 opacity-50" />
+      );
+    }
+
+    const remainingStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(
+        <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
+      );
+    }
+
+    return stars;
+  };
+
   return (
-    <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-      <div className="relative aspect-square overflow-hidden">
+    <div
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleViewDetails}
+    >
+      {/* Product Image */}
+      <div className="relative overflow-hidden">
         <img
-          src={product.image_url || "/placeholder.svg"}
+          src={product.image || product.image_url}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-2 bg-white rounded-full shadow-md hover:bg-rose-50 hover:text-rose-600 transition-colors">
-            <Heart className="w-5 h-5" />
-          </button>
-        </div>
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavoriteClick}
+          className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
+            isFavorite
+              ? 'bg-rose-500 text-white'
+              : 'bg-white/80 text-gray-600 hover:bg-white hover:text-rose-500'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </button>
+
+        {/* Sale Badge */}
+        {product.originalPrice && product.originalPrice > product.price && (
+          <div className="absolute top-3 left-3 bg-rose-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+            Sale
+          </div>
+        )}
+
+        {/* Stock Badge */}
         {product.stock < 10 && product.stock > 0 && (
-          <div className="absolute top-4 left-4 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+          <div className="absolute bottom-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-medium">
             Only {product.stock} left
           </div>
         )}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="text-white font-semibold">Out of Stock</span>
+
+        {/* Quick Actions Overlay */}
+        <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`}>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleViewDetails}
+              className="bg-white text-gray-900 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleAddToCart}
+              disabled={!product.inStock || product.stock === 0}
+              className="bg-rose-500 text-white p-2 rounded-full hover:bg-rose-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <ShoppingCart className="w-4 h-4" />
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="p-6">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-2xl font-bold text-gray-900">${product.price}</span>
-          <span className="text-sm text-gray-500 capitalize">{product.category}</span>
+      {/* Product Info */}
+      <div className="p-4">
+        <div className="mb-2">
+          <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
+            {product.name}
+          </h3>
+          <p className="text-gray-600 text-sm line-clamp-2">
+            {product.description}
+          </p>
         </div>
 
+        {/* Price */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex space-x-1">
-            {product.color.slice(0, 3).map((color, index) => (
-              <div
-                key={index}
-                className="w-4 h-4 rounded-full border border-gray-200"
-                style={{ backgroundColor: color.toLowerCase() }}
-                title={color}
-              />
-            ))}
+          <div className="flex items-center space-x-2">
+            <span className="text-xl font-bold text-gray-900">
+              {formatNPR(product.price)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-sm text-gray-500 line-through">
+                {formatNPR(product.originalPrice)}
+              </span>
+            )}
           </div>
-          <div className="text-xs text-gray-500">Sizes: {product.size.join(", ")}</div>
+
+          {(!product.inStock || product.stock === 0) && (
+            <span className="text-sm text-red-500 font-medium">
+              Out of Stock
+            </span>
+          )}
         </div>
 
-        <div className="flex space-x-2">
-          <button
-            onClick={() => onViewDetails(product)}
-            className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-          >
-            View Details
-          </button>
-          <button
-            onClick={() => onAddToCart(product)}
-            disabled={product.stock === 0}
-            className="flex-1 py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center justify-center space-x-1"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            <span>Add to Cart</span>
-          </button>
-        </div>
+        {/* Add to Cart Button */}
+        <button
+          onClick={handleAddToCart}
+          disabled={!product.inStock || product.stock === 0}
+          className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+            (product.inStock && product.stock > 0)
+              ? 'bg-rose-500 text-white hover:bg-rose-600'
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {(product.inStock && product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}
+        </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductCard
+export default ProductCard;

@@ -1,78 +1,109 @@
-"use client"
+import { Trash2, Plus, Minus, ShoppingBag, X } from "lucide-react";
 
-import { useState } from "react"
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react"
-import { Link } from "react-router-dom"
+// Utility: Format numbers into NPR (e.g., Rs. 1,23,456)
+const formatNPR = (amount) => {
+  if (isNaN(amount)) return '';
+  return `Rs. ${new Intl.NumberFormat("en-IN").format(Math.round(amount))}`;
+};
 
-const Cart = () => {
-  const [cartItems, setCartItems] = useState([])
+// Order Summary Component
+const OrderSummary = ({ total, tax, grandTotal, cartItems, onCheckout }) => (
+  <div className="bg-gray-50 rounded-xl p-6">
+    <h3 className="text-xl font-semibold mb-6">Order Summary</h3>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <span>Subtotal</span>
+        <span>{formatNPR(total)}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Shipping</span>
+        <span>Free</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Tax (8%)</span>
+        <span>{formatNPR(tax)}</span>
+      </div>
+      <hr />
+      <div className="flex justify-between text-xl font-bold">
+        <span>Total</span>
+        <span>{formatNPR(grandTotal)}</span>
+      </div>
+    </div>
+    <button
+      onClick={() => onCheckout(cartItems, grandTotal)}
+      className="w-full mt-6 bg-rose-600 text-white py-3 rounded-lg hover:bg-rose-700 transition-colors font-medium"
+    >
+      Proceed to Checkout
+    </button>
+    <p className="text-xs text-gray-500 text-center mt-4">
+      Secure checkout powered by Ime PAY
+    </p>
+  </div>
+);
 
-  const updateQuantity = (index, quantity) => {
-    if (quantity <= 0) return
-    const updatedItems = [...cartItems]
-    updatedItems[index].quantity = quantity
-    setCartItems(updatedItems)
-  }
+// Main Cart Component
+const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCheckout }) => {
+  if (!isOpen) return null;
 
-  const removeItem = (index) => {
-    const updatedItems = cartItems.filter((_, i) => i !== index)
-    setCartItems(updatedItems)
-  }
-
-  const handleCheckout = () => {
-    alert("Checkout functionality would be implemented here!")
-    setCartItems([])
-  }
-
-  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const tax = total * 0.08;
+  const grandTotal = total + tax;
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-16">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-2xl max-w-md w-full">
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center rounded-t-2xl">
+            <div className="flex items-center space-x-2">
+              <ShoppingBag className="w-6 h-6 text-rose-600" />
+              <h2 className="text-xl font-semibold">Shopping Cart</h2>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="p-6 text-center">
             <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Start shopping and add some items to your cart!</p>
-            <Link
-              to="/"
-              className="inline-flex items-center space-x-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+            <p className="text-gray-600 mb-6">Start shopping and add some items to your cart!</p>
+            <button
+              onClick={onClose}
+              className="bg-rose-600 text-white px-6 py-3 rounded-lg hover:bg-rose-700 transition-colors font-medium"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Continue Shopping</span>
-            </Link>
+              Continue Shopping
+            </button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-          <Link
-            to="/"
-            className="inline-flex items-center space-x-2 text-indigo-600 hover:text-indigo-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Continue Shopping</span>
-          </Link>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center rounded-t-2xl">
+          <div className="flex items-center space-x-2">
+            <ShoppingBag className="w-6 h-6 text-rose-600" />
+            <h2 className="text-xl font-semibold">Shopping Cart ({cartItems.length})</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold mb-6">Cart Items ({cartItems.length})</h2>
+        <div className="p-6">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Cart Items */}
+            <div className="lg:col-span-2">
               <div className="space-y-6">
                 {cartItems.map((item, index) => (
                   <div
-                    key={index}
+                    key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
                     className="flex items-center space-x-4 pb-6 border-b border-gray-200 last:border-b-0"
                   >
                     <img
-                      src={item.product.image_url || "/placeholder.svg"}
+                      src={item.product.image || item.product.image_url}
                       alt={item.product.name}
                       className="w-20 h-20 object-cover rounded-lg"
                     />
@@ -81,11 +112,16 @@ const Cart = () => {
                       <p className="text-sm text-gray-600">
                         Size: {item.selectedSize} | Color: {item.selectedColor}
                       </p>
-                      <p className="text-lg font-bold text-gray-900 mt-1">${item.product.price}</p>
+                      <p className="text-gray-700 mt-1 text-sm">
+                        Price: {formatNPR(item.product.price)} x {item.quantity}
+                      </p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {formatNPR(item.product.price * item.quantity)}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => updateQuantity(index, item.quantity - 1)}
+                        onClick={() => onUpdateQuantity(index, item.quantity - 1)}
                         className="p-1 hover:bg-gray-100 rounded transition-colors"
                         disabled={item.quantity <= 1}
                       >
@@ -93,14 +129,14 @@ const Cart = () => {
                       </button>
                       <span className="w-8 text-center font-medium">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(index, item.quantity + 1)}
+                        onClick={() => onUpdateQuantity(index, item.quantity + 1)}
                         className="p-1 hover:bg-gray-100 rounded transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     <button
-                      onClick={() => removeItem(index)}
+                      onClick={() => onRemoveItem(index)}
                       className="p-2 text-rose-600 hover:bg-rose-50 rounded transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -109,43 +145,22 @@ const Cart = () => {
                 ))}
               </div>
             </div>
-          </div>
 
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
-              <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>${(total * 0.08).toFixed(2)}</span>
-                </div>
-                <hr />
-                <div className="flex justify-between text-xl font-bold">
-                  <span>Total</span>
-                  <span>${(total * 1.08).toFixed(2)}</span>
-                </div>
-              </div>
-              <button
-                onClick={handleCheckout}
-                className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-              >
-                Proceed to Checkout
-              </button>
-              <p className="text-xs text-gray-500 text-center mt-4">Secure checkout powered by Stripe</p>
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <OrderSummary
+                total={total}
+                tax={tax}
+                grandTotal={grandTotal}
+                cartItems={cartItems}
+                onCheckout={onCheckout}
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;
