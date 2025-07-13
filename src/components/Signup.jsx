@@ -58,16 +58,16 @@ const Signup = () => {
     }
 
     try {
-      const { name, email, password, phone, address, gender } = formData
+      const { name, email, phone, address, gender, password } = formData
 
       // Axios API call
       const response = await axios.post("http://localhost:3000/api/users", {
         name,
         email,
-        password,
         phone,
         address,
         gender,
+        password,
       })
 
       // CreateUser  API call
@@ -75,6 +75,9 @@ const Signup = () => {
         username: name,
         email,
         password,
+        phone,
+        address,
+        gender,
       })
 
       // Create user object for local storage and DataTable
@@ -85,6 +88,7 @@ const Signup = () => {
         phone: formData.phone,
         address: formData.address,
         gender: formData.gender,
+        password: formData.password,
         createdAt: new Date().toISOString(),
       }
 
