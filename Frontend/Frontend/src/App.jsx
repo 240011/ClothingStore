@@ -1,15 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Homepage from './Public/Homepage';
-import Signup from './Private/Signup';
-import AdminDashboard from './Public/AdminDashboard';
-import UserLogin from './Private/UserLogin';
-import Cart from './Public/Cart';
-import Productmodal from './Public/ProductModal';
-import ProductCard from './Public/ProductCard';
-import AdminLogin from './Private/AdminLogin'; 
-import AboutUs from './Private/AboutUs'; 
-import ContactUs from './Public/ContactUs'; // Importing the AboutUs component
+import Homepage from './components/Homepage';
+import Signup from './components/Signup';
+import AdminDashboard from './components/AdminDashboard';
+import UserLogin from './components/UserLogin';
+import Cart from './components/Cart';
+import Productmodal from './components/ProductModal';
+import ProductCard from './components/ProductCard';
+import AdminLogin from './components/AdminLogin'; 
+import AboutUs from './components/AboutUs'; 
+import ContactUs from './components/ContactUs'; // Importing the AboutUs component
 // Importing the AboutUs component
 
 

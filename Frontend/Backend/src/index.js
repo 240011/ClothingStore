@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { db } from "./database/index.js"; // Ensure this function connects to your database
-import { userRouter, authRouter,contactRouter } from "./route/index.js"; // Combined import for clarity
+import { userRouter, authRouter } from "./route/index.js"; // Combined import for clarity
 import dotenv from "dotenv";
 import { authenticateToken } from "./middleware/token-middleware.js";
 import router from "./route/uploadRoutes.js";
@@ -25,7 +25,6 @@ app.use(bodyParser.json());
 // Apply authentication middleware to specific routes
 app.use("/api/users", userRouter); // Public route
 app.use("/api/auth", authRouter); // Public route
-app.use("/api/contacts", contactRouter); // Public route
 app.use(authenticateToken); // Apply to routes that need authentication
 app.use("/api/file", router);
 

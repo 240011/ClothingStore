@@ -5,6 +5,6 @@ router.get("/", userController.getAll);
 router.post("/", userController.create);
 router.put("/:id", userController.update);
 router.get("/:id", userController.getById);
-router.delete("/:id", userController.deleteById);
+router.delete("/:id", userController.delelteById);
 
 export { router as userRouter };
