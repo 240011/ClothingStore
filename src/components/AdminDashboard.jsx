@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Settings, LogOut } from "lucide-react"
-import Dashboard from "./Dashboard"
-import Products from "./product"
-import Orders from "./Order"
-import Customers from "./Customer"
+import Dashboard from "./Dashboards"
+import Products from "./Products"
+import Orders from "./Orders"
+import Customers from "./Customers"
 
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState("dashboard")
