@@ -2,7 +2,7 @@ import { useState } from "react"
 import Header from "../components/Header"
 import ProductCard from "./ProductCard"
 import ProductModal from "./ProductModal"
-import Cart from "./Cart"
+import Cart from "../Private/Cart"
 import { sampleProducts } from "../data/products"
 import { useNavigate } from "react-router-dom"
 

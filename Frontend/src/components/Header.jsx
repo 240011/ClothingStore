@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, ShoppingCart, User, Menu, X, Heart, Shield, LogOut } from "lucide-react"
+import { Search, ShoppingCart, User, Menu, X, Heart, Shield, LogOut, Settings, Package } from "lucide-react"
 
 const Header = ({
   onSearchChange,
@@ -16,6 +16,7 @@ const Header = ({
   const [searchQuery, setSearchQuery] = useState("")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [showUserDropdown, setShowUserDropdown] = useState(false)
   const navigate = useNavigate()
 
   const categories = ["All", "T-Shirts", "Jeans", "Dresses", "Accessories"]
@@ -30,7 +31,6 @@ const Header = ({
     navigate("/admin-login")
   }
 
-
   const handleSignupClick = () => {
     navigate("/signup")
   }
@@ -38,6 +38,9 @@ const Header = ({
   const handleLogout = () => {
     setCurrentUser(null)
     localStorage.removeItem("authToken")
+    localStorage.removeItem("userType")
+    localStorage.removeItem("userEmail")
+    setShowUserDropdown(false)
     navigate("/")
   }
 
@@ -47,7 +50,7 @@ const Header = ({
   }
 
   // Check for logged in user on component mount
-  useState(() => {
+  useEffect(() => {
     const token = localStorage.getItem("authToken")
     const userType = localStorage.getItem("userType")
     const userEmail = localStorage.getItem("userEmail")
@@ -63,8 +66,11 @@ const Header = ({
   const renderUserSection = () => {
     if (currentUser) {
       return (
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
+        <div className="relative">
+          <button
+            onClick={() => setShowUserDropdown(!showUserDropdown)}
+            className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center ${
                 currentUser.type === "admin"
@@ -74,18 +80,58 @@ const Header = ({
             >
               <span className="text-white font-medium text-xs">{getUserInitials(currentUser.email)}</span>
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block text-left">
               <p className="text-sm font-medium text-gray-700">{currentUser.type === "admin" ? "Admin" : "User"}</p>
               <p className="text-xs text-gray-500 truncate max-w-24">{currentUser.email}</p>
             </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
-            title="Logout"
-          >
-            <LogOut className="w-5 h-5" />
           </button>
+
+          {/* User Dropdown */}
+          {showUserDropdown && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <div className="px-4 py-2 border-b border-gray-100">
+                <p className="text-sm font-medium text-gray-900">
+                  {currentUser.type === "admin" ? "Admin Panel" : "My Account"}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+              </div>
+
+              {currentUser.type !== "admin" && (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate("/user-profile")
+                      setShowUserDropdown(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Profile Settings</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate("/order-history")
+                      setShowUserDropdown(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Order History</span>
+                  </button>
+                </>
+              )}
+
+              <div className="border-t border-gray-100 mt-2 pt-2">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )
     }
@@ -100,7 +146,6 @@ const Header = ({
           <Shield className="w-5 h-5" />
           <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
-
         <button
           onClick={handleSignupClick}
           className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all duration-200 text-sm font-medium"
@@ -111,6 +156,20 @@ const Header = ({
       </div>
     )
   }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest(".relative")) {
+        setShowUserDropdown(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showUserDropdown])
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-40">
@@ -238,7 +297,7 @@ const Header = ({
             {/* Mobile User Section */}
             <div className="border-t border-gray-200 pt-4">
               {currentUser ? (
-                <div className="flex items-center justify-between">
+                <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -256,8 +315,38 @@ const Header = ({
                       <p className="text-xs text-gray-500">{currentUser.email}</p>
                     </div>
                   </div>
-                  <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+
+                  {currentUser.type !== "admin" && (
+                    <>
+                      <button
+                        onClick={() => {
+                          navigate("/user-profile")
+                          setIsMenuOpen(false)
+                        }}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors w-full text-left"
+                      >
+                        <Settings className="w-5 h-5" />
+                        <span className="text-sm font-medium">Profile Settings</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/order-history")
+                          setIsMenuOpen(false)
+                        }}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors w-full text-left"
+                      >
+                        <Package className="w-5 h-5" />
+                        <span className="text-sm font-medium">Order History</span>
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 transition-colors w-full text-left"
+                  >
                     <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">Sign Out</span>
                   </button>
                 </div>
               ) : (
@@ -272,7 +361,6 @@ const Header = ({
                     <Shield className="w-5 h-5" />
                     <span className="text-sm font-medium">Admin Access</span>
                   </button>
-                
                   <button
                     onClick={() => {
                       handleSignupClick()

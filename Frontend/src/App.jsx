@@ -1,16 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Homepage from './Public/Homepage';
-import Signup from './Private/Signup';
-import AdminDashboard from './Public/AdminDashboard';
-import UserLogin from './Private/UserLogin';
-import Cart from './Public/Cart';
+import Signup from './Public/Signup';
+import AdminDashboard from './Private/AdminDashboard';
+import UserLogin from './Public/UserLogin';
+import Cart from './Private/Cart';
 import Productmodal from './Public/ProductModal';
 import ProductCard from './Public/ProductCard';
 import AdminLogin from './Private/AdminLogin'; 
-import AboutUs from './Private/AboutUs'; 
-import ContactUs from './Public/ContactUs'; // Importing the AboutUs component
-// Importing the AboutUs component
+import AboutUs from './Public/AboutUs'; 
+import UserProfile from './Private/UserProfile';
+import OrderHistory from './Private/OrderHistory';
+import ContactUs from './Public/ContactUs';
+
+ // Importing the AboutUs component
+
 
 
 function App() {
@@ -27,6 +31,9 @@ function App() {
           <Route path="/product/:id" element={<Productmodal />} />
           <Route path="/product-card" element={<ProductCard />} />
           <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/userprofile" element={<UserProfile />} />
+          <Route Rouute path="/orderhistory" element={<OrderHistory />} />
+          {/* Add more
           {/* Adding the About Us route */}
           <Route path="/contactus" element={<ContactUs />} />
           {/* Adding the Contact Us route */}
