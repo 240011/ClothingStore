@@ -128,6 +128,8 @@ const getAll = async (req, res) => {
 /**
  * create new user
  */
+import bcrypt from 'bcrypt';
+
 const create = async (req, res) => {
     try {
         const body = req.body
@@ -143,13 +145,15 @@ const create = async (req, res) => {
             return res.status(400).send({ message: "Gender must be 'male', 'female', or 'other'" });
         }
 
+        const hashedPassword = await bcrypt.hash(body.password, 10);
+
         const users = await User.create({
             name: body.name,
             email: body.email,
             phone: body.phone,
             address: body.address || null,
             gender: body.gender || null,
-            password: body.password
+            password: hashedPassword
         });
         
         res.status(201).send({ data: users, message: "successfully created user" })
@@ -185,7 +189,10 @@ const update = async (req, res) => {
         if (body.phone) oldUser.phone = body.phone;
         if (body.address !== undefined) oldUser.address = body.address;
         if (body.gender !== undefined) oldUser.gender = body.gender;
-         if (body.password) oldUser.password = body.password;
+         if (body.password) {
+            const hashedPassword = await bcrypt.hash(body.password, 10);
+            oldUser.password = hashedPassword;
+         }
 
         await oldUser.save();
         

@@ -30,10 +30,10 @@ export const User = sequelize.define("User", {
       isNumeric: true,
       len: [10, 15], // Adjust length based on your requirements
     },
-     password: {
-    type: DataTypes.STRING,
-    allowNull: false,
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,  // Temporarily allow null to add column without error
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -45,4 +45,4 @@ export const User = sequelize.define("User", {
   },
 }, {
   timestamps: true, // Automatically manage createdAt and updatedAt fields
-}); 
+});

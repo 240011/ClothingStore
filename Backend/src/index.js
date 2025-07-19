@@ -25,6 +25,7 @@ app.use(bodyParser.json());
 // Apply authentication middleware to specific routes
 app.use("/api/users", userRouter); // Public route
 app.use("/api/auth", authRouter); // Public route
+app.use("/api/contact", contactRouter); // Contact routes
 app.use("/api/cart", cartRouter); // Cart routes
 app.use(authenticateToken); // Apply to routes that need authentication
 app.use("/api/file", router);

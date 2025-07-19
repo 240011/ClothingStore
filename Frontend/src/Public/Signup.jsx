@@ -23,21 +23,16 @@ const Signup = () => {
   })
 
   useEffect(() => {
-    const savedUserData = localStorage.getItem("registeredUsers")
-    if (savedUserData) {
+    const fetchUsers = async () => {
       try {
-        setUserData(JSON.parse(savedUserData))
+        const response = await axios.get("http://localhost:3000/api/users")
+        setUserData(response.data.data)
       } catch (error) {
-        console.error("Error loading user data from localStorage:", error)
+        console.error("Failed to fetch users from backend:", error)
       }
     }
+    fetchUsers()
   }, [])
-
-  useEffect(() => {
-    if (userData.length > 0) {
-      localStorage.setItem("registeredUsers", JSON.stringify(userData))
-    }
-  }, [userData])
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -60,39 +55,19 @@ const Signup = () => {
     try {
       const { name, email, phone, address, gender, password } = formData
 
-      // Axios API call
-      const response = await axios.post("http://localhost:3000/api/users", {
+      // CreateUser API call
+      const response = await createUser ({
         name,
         email,
-        phone,
-        address,
-        gender,
-        password,
-      })
-
-      // CreateUser  API call
-      await createUser ({
-        username: name,
-        email,
         password,
         phone,
         address,
         gender,
       })
 
-      // Create user object for local storage and DataTable
-      const newUser  = {
-        id: Date.now(),
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        gender: formData.gender,
-        password: formData.password,
-        createdAt: new Date().toISOString(),
-      }
+      // Update userData state with new user from backend response
+      setUserData((prevData) => [...prevData, response.data.data])
 
-      setUserData((prevData) => [...prevData, newUser ])
       setFormData({
         name: "",
         email: "",
@@ -114,23 +89,25 @@ const Signup = () => {
     }
   }
 
-  const handleDeleteUser  = (index) => {
+  const handleDeleteUser  = async (index) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      const updatedUserData = userData.filter((_, i) => i !== index)
-      setUserData(updatedUserData)
-      if (updatedUserData.length === 0) {
-        localStorage.removeItem("registeredUsers")
-      } else {
-        localStorage.setItem("registeredUsers", JSON.stringify(updatedUserData))
+      try {
+        const userToDelete = userData[index]
+        await axios.delete(`http://localhost:3000/api/users/${userToDelete.id}`)
+        const updatedUserData = userData.filter((_, i) => i !== index)
+        setUserData(updatedUserData)
+        setState({ message: "User deleted successfully.", success: true, errors: {} })
+      } catch (error) {
+        const errMsg = error.response?.data?.message || error.message || "Failed to delete user."
+        setState({ message: errMsg, success: false, errors: {} })
       }
-      setState({ message: "User  deleted successfully.", success: true, errors: {} })
     }
   }
 
   const handleClearAllData = () => {
     if (window.confirm("Are you sure you want to clear all registered users? This action cannot be undone.")) {
+      // Optionally, implement backend API to delete all users if needed
       setUserData([])
-      localStorage.removeItem("registeredUsers")
       setState({ message: "All user data cleared successfully.", success: true, errors: {} })
     }
   }

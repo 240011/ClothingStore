@@ -4,10 +4,7 @@ import { CheckCircle, Clock, Settings } from "lucide-react"
 
 const Dashboard = () => {
   const [dashboardStats] = React.useState({
-    totalRevenue: 45230,
-    totalOrders: 1234,
-    totalProducts: 56,
-    totalCustomers: 567,
+  
   })
 
   const [recentOrders] = React.useState([
@@ -55,33 +52,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Revenue"
-          value={`Rs. ${dashboardStats.totalRevenue.toLocaleString()}`}
-          icon={DollarSign}
-          color="bg-green-500"
-        />
-        <StatCard
-          title="Total Orders"
-          value={dashboardStats.totalOrders.toLocaleString()}
-          icon={ShoppingCart}
-          color="bg-blue-500"
-        />
-        <StatCard 
-          title="Products" 
-          value={dashboardStats.totalProducts} 
-          icon={Package} 
-          color="bg-purple-500" 
-        />
-        <StatCard
-          title="Customers"
-          value={dashboardStats.totalCustomers}
-          icon={Users}
-          color="bg-orange-500"
-        />
-      </div>
-
+     
+      
       {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import axios from "axios"
 import Header from "../components/Header"
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react"
 
@@ -15,6 +16,8 @@ const ContactUs = () => {
     message: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
   // Placeholder functions for Header props
   const handleSearch = (query) => {
@@ -39,18 +42,34 @@ const ContactUs = () => {
       ...prev,
       [name]: value,
     }))
+    if (error) setError("")
+    if (success) setSuccess("")
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError("")
+    setSuccess("")
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    alert("Thank you for your message! We'll get back to you soon.")
-    setFormData({ name: "", email: "", message: "" })
-    setIsSubmitting(false)
+    try {
+      const token = localStorage.getItem("authToken")
+      const response = await axios.post(
+        "http://localhost:3000/api/contact/",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      setSuccess(response.data.message || "Thank you for your message! We'll get back to you soon.")
+      setFormData({ name: "", email: "", message: "" })
+    } catch (err) {
+      setError("Failed to submit contact form. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -81,6 +100,16 @@ const ContactUs = () => {
               {/* Contact Form */}
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                    {success}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <input

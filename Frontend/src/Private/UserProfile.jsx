@@ -1,286 +1,150 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import {
-  User,
-  Mail,
-  Phone,
-  Lock,
-} from "lucide-react"
- // Ensure this import path is correct
+import { useState } from "react"
+import ProfileLayout from "../components/ProfileLayout"
+import { Pencil, Save, User, Mail, Phone } from "lucide-react"
 
 const UserProfile = () => {
-  const navigate = useNavigate()
-  const [currentUser, setCurrentUser] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [profileData, setProfileData] = useState({
-    id: "",
-    firstName: "",
-    lastName: "",
-    gender: "",
-    email: "",
-    mobile: "",
+  const [userInfo, setUserInfo] = useState({
+    firstName: "Niraj",
+    lastName: "Bam",
+    gender: "male",
+    email: "nirajbam@example.com",
+    mobile: "9841000000",
   })
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const fetchUserInfo = async () => {
-    try {
-      const response = await userapi.get("/api/auth/init")
-      setProfileData(response.data.data)
-    } catch (error) {
-      console.error("Failed to fetch user info", error)
-    }
-  }
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken")
-    const userEmail = localStorage.getItem("userEmail")
-    const userType = localStorage.getItem("userType")
-
-    if (!token || !userEmail) {
-      navigate("/signup")
-      return
-    }
-
-    setCurrentUser({ email: userEmail, type: userType })
-    fetchUserInfo()
-  }, [navigate])
 
   const handleInputChange = (field, value) => {
-    setProfileData((prev) => ({
+    setUserInfo((prev) => ({
       ...prev,
       [field]: value,
     }))
   }
 
-  const handleSaveProfile = async () => {
-    setLoading(true)
-    try {
-      await userapi.put(`/api/users/${profileData.id}`, profileData)
-      setIsEditing(false)
-      fetchUserInfo()
-      alert("Profile updated successfully!")
-    } catch (error) {
-      console.error("Profile update failed:", error)
-      alert("Failed to update profile. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleEdit = () => setIsEditing(true)
 
-  const handlePasswordChange = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords don't match!")
-      return
-    }
-    if (passwordData.newPassword.length < 6) {
-      alert("Password must be at least 6 characters long!")
-      return
-    }
-
-    setLoading(true)
-    try {
-      // Replace this with your API call when ready
-      alert("Password updated successfully!")
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-      setShowPasswordForm(false)
-    } catch (error) {
-      alert("Failed to update password. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  const handleSave = () => {
+    alert("Profile saved (frontend only)")
+    setIsEditing(false)
   }
 
   return (
-    <div className="px-6 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-            <User className="w-5 h-5" />
-            <span>Personal Information</span>
-          </h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-              <input
-                type="text"
-                value={profileData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                disabled={!isEditing}
-                className={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 ${
-                  isEditing ? "border-gray-300 bg-white focus:ring-2 focus:ring-rose-500 focus:border-transparent" : "border-gray-200 bg-gray-50 text-gray-500"
-                }`}
-                placeholder="Enter your first name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-              <input
-                type="text"
-                value={profileData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                disabled={!isEditing}
-                className={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 ${
-                  isEditing ? "border-gray-300 bg-white focus:ring-2 focus:ring-rose-500 focus:border-transparent" : "border-gray-200 bg-gray-50 text-gray-500"
-                }`}
-                placeholder="Enter your last name"
-              />
-            </div>
+    <ProfileLayout>
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-purple-50 py-10 px-6">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Personal Information</h1>
+            <button
+              onClick={isEditing ? handleSave : handleEdit}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg text-sm hover:from-rose-600 hover:to-purple-700 transition-all duration-200"
+            >
+              {isEditing ? <Save className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+              {isEditing ? "Save" : "Edit"}
+            </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
-            <div className="flex space-x-6">
-              <label className="flex items-center">
+          <div className="space-y-6">
+            {/* Name Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  checked={profileData.gender === "male"}
-                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                  type="text"
+                  value={userInfo.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
                   disabled={!isEditing}
-                  className="mr-2 text-rose-600 focus:ring-rose-500"
+                  placeholder="First Name"
+                  className={`pl-10 py-3 w-full border rounded-lg text-sm ${
+                    isEditing
+                      ? "bg-white border-gray-300 focus:ring-2 focus:ring-rose-500"
+                      : "bg-gray-100 border-gray-200"
+                  }`}
                 />
-                <span className="text-gray-700">Male</span>
-              </label>
-              <label className="flex items-center">
+              </div>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  checked={profileData.gender === "female"}
-                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                  type="text"
+                  value={userInfo.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
                   disabled={!isEditing}
-                  className="mr-2 text-rose-600 focus:ring-rose-500"
+                  placeholder="Last Name"
+                  className={`pl-10 py-3 w-full border rounded-lg text-sm ${
+                    isEditing
+                      ? "bg-white border-gray-300 focus:ring-2 focus:ring-rose-500"
+                      : "bg-gray-100 border-gray-200"
+                  }`}
                 />
-                <span className="text-gray-700">Female</span>
-              </label>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            {/* Gender */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Gender</h3>
+              <div className="flex gap-6">
+                {["male", "female"].map((gender) => (
+                  <label
+                    key={gender}
+                    className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={gender}
+                      checked={userInfo.gender === gender}
+                      onChange={(e) => handleInputChange("gender", e.target.value)}
+                      disabled={!isEditing}
+                      className="text-rose-500 focus:ring-rose-500"
+                    />
+                    {gender === "male" ? (
+                      <Mars className="w-4 h-4 text-blue-500" />
+                    ) : (
+                      <Venus className="w-4 h-4 text-pink-500" />
+                    )}
+                    <span className="capitalize">{gender}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Email */}
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="email"
-                value={profileData.email}
-                disabled
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                value={userInfo.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                disabled={!isEditing}
+                placeholder="Email Address"
+                className={`pl-10 py-3 w-full border rounded-lg text-sm ${
+                  isEditing
+                    ? "bg-white border-gray-300 focus:ring-2 focus:ring-rose-500"
+                    : "bg-gray-100 border-gray-200"
+                }`}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+            {/* Mobile */}
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="tel"
-                value={profileData.mobile}
+                value={userInfo.mobile}
                 onChange={(e) => handleInputChange("mobile", e.target.value)}
                 disabled={!isEditing}
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg text-sm text-gray-700 ${
-                  isEditing ? "border-gray-300 bg-white focus:ring-2 focus:ring-rose-500 focus:border-transparent" : "border-gray-200 bg-gray-50 text-gray-500"
+                placeholder="Mobile Number"
+                className={`pl-10 py-3 w-full border rounded-lg text-sm ${
+                  isEditing
+                    ? "bg-white border-gray-300 focus:ring-2 focus:ring-rose-500"
+                    : "bg-gray-100 border-gray-200"
                 }`}
-                placeholder="Enter your mobile number"
               />
             </div>
           </div>
-
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            >
-              {isEditing ? "Cancel" : "Edit"}
-            </button>
-            {isEditing && (
-              <button
-                onClick={handleSaveProfile}
-                className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700"
-              >
-                Save
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Lock className="w-5 h-5" />
-              <span>Password & Security</span>
-            </h3>
-            <button
-              onClick={() => setShowPasswordForm(!showPasswordForm)}
-              className="text-rose-600 hover:text-rose-700 font-medium"
-            >
-              {showPasswordForm ? "Cancel" : "Change Password"}
-            </button>
-          </div>
-
-          {showPasswordForm && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData((prev) => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                  placeholder="Enter current password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                  placeholder="Enter new password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                  placeholder="Confirm new password"
-                />
-              </div>
-              <div className="md:col-span-3">
-                <button
-                  onClick={handlePasswordChange}
-                  disabled={
-                    loading ||
-                    !passwordData.currentPassword ||
-                    !passwordData.newPassword ||
-                    !passwordData.confirmPassword
-                  }
-                  className="bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Updating..." : "Update Password"}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
-    </div>
+    </ProfileLayout>
   )
 }
 
