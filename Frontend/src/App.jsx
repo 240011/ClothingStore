@@ -32,7 +32,7 @@ function App() {
           <Route path="/product-card" element={<ProductCard />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/user-profile" element={<UserProfile />} />
-          <Route Rouute path="/order-history" element={<OrderHistory />} />
+          <Route path="/order-history" element={<OrderHistory />} />
           {/* Add more
           {/* Adding the About Us route */}
           <Route path="/contactus" element={<ContactUs />} />

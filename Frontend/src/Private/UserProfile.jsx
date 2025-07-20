@@ -7,11 +7,11 @@ import { Pencil, Save, User, Mail, Phone } from "lucide-react"
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [userInfo, setUserInfo] = useState({
-    firstName: "Niraj",
-    lastName: "Bam",
-    gender: "male",
-    email: "nirajbam@example.com",
-    mobile: "9841000000",
+    firstName: "",
+    lastName: "",
+    gender: "",
+    email: "",
+    mobile: "",
   })
 
   const handleInputChange = (field, value) => {
@@ -97,11 +97,7 @@ const UserProfile = () => {
                       disabled={!isEditing}
                       className="text-rose-500 focus:ring-rose-500"
                     />
-                    {gender === "male" ? (
-                      <Mars className="w-4 h-4 text-blue-500" />
-                    ) : (
-                      <Venus className="w-4 h-4 text-pink-500" />
-                    )}
+                    <User className="w-4 h-4 text-gray-500" />
                     <span className="capitalize">{gender}</span>
                   </label>
                 ))}

@@ -40,21 +40,12 @@ const ProfileLayout = ({ children }) => {
 
           <nav className="flex flex-col gap-4 text-left">
             <Link
-              to="/profile"
+              to="/"
               className={`flex items-center px-4 py-2 rounded-md ${
                 isActive("/profile") ? "bg-teal-600 text-white" : "hover:bg-teal-600 hover:text-white"
               }`}
             >
               <User className="mr-3 w-4 h-4" /> Profile information
-            </Link>
-
-            <Link
-              to="/manage-addresses"
-              className={`flex items-center px-4 py-2 rounded-md ${
-                isActive("/manage-addresses") ? "bg-teal-600 text-white" : "hover:bg-teal-600 hover:text-white"
-              }`}
-            >
-              <MapPin className="mr-3 w-4 h-4" /> Manage Address
             </Link>
 
             <Link
