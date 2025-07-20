@@ -26,23 +26,25 @@ const ProfileLayout = ({ children }) => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-white shadow-lg">
       <div className="flex pt-[100px] min-h-screen">
-        <aside className="w-[250px] bg-[#f0f4f4] p-5 flex flex-col shadow-md">
+        <aside className="w-[250px] bg-white p-5 flex flex-col shadow-md border border-gray-200 rounded-lg">
           <div className="flex items-center space-x-4 mb-10 mt-5">
-            <div className="w-12 h-12 rounded-full bg-gray-400"></div>
-            <p className="text-gray-700 text-sm">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-rose-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+              U
+            </div>
+            <p className="text-gray-900 text-sm font-semibold">
               Hello
               <br />
               <strong>User</strong>
             </p>
           </div>
 
-          <nav className="flex flex-col gap-4 text-left">
+          <nav className="flex flex-col gap-4 text-left text-gray-700 font-medium">
             <Link
-              to="/"
+              to="/user-profile"
               className={`flex items-center px-4 py-2 rounded-md ${
-                isActive("/profile") ? "bg-teal-600 text-white" : "hover:bg-teal-600 hover:text-white"
+                isActive("/user-profile") ? "bg-gradient-to-r from-rose-500 to-purple-600 text-white" : "hover:bg-gradient-to-r hover:from-rose-500 hover:to-purple-600 hover:text-white"
               }`}
             >
               <User className="mr-3 w-4 h-4" /> Profile information
@@ -52,8 +54,8 @@ const ProfileLayout = ({ children }) => {
               to="/order-history"
               className={`flex items-center px-4 py-2 rounded-md ${
                 isActive("/order-history") || isActive("/profile/return-refund")
-                  ? "bg-teal-600 text-white"
-                  : "hover:bg-teal-600 hover:text-white"
+                  ? "bg-gradient-to-r from-rose-500 to-purple-600 text-white"
+                  : "hover:bg-gradient-to-r hover:from-rose-500 hover:to-purple-600 hover:text-white"
               }`}
             >
               <History className="mr-3 w-4 h-4" /> History
@@ -68,7 +70,7 @@ const ProfileLayout = ({ children }) => {
           </div>
         </aside>
 
-        <main className="flex-1 bg-white shadow-sm">{children}</main>
+        <main className="flex-1 bg-white shadow-sm rounded-lg p-6">{children}</main>
       </div>
 
       {showLogoutPopup && (

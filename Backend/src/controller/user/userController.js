@@ -230,13 +230,14 @@ const deleteById = async (req, res) => {
 const getById = async (req, res) => {
     try {
         const { id = null } = req.params;
+        console.log("getById called with id:", id);
         const user = await User.findOne({ where: { id } })
         if (!user) {
             return res.status(404).send({ message: "User not found" });
         }
         res.status(200).send({ message: "user fetched successfully", data: user })
     } catch (e) {
-        console.log(e)
+        console.log("Error in getById:", e)
         res.status(500).json({ error: 'Failed to fetch user' });
     }
 }

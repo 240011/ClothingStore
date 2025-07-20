@@ -65,6 +65,9 @@ const Signup = () => {
         gender,
       })
 
+      // Save userId to localStorage
+      localStorage.setItem("userId", response.data.data.id)
+
       // Update userData state with new user from backend response
       setUserData((prevData) => [...prevData, response.data.data])
 
@@ -80,7 +83,7 @@ const Signup = () => {
       setState({ message: "Account created successfully!", success: true, errors: {} })
       setPending(false)
 
-      // Navigate to user login page after successful registration
+      // Navigate to user profile page after successful registration
       setTimeout(() => navigate("/userlogin"), 1000)
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message || "Registration failed. Please try again."
