@@ -7,23 +7,33 @@ import Products from "./Products"
 import Orders from "./Orders"
 import Customers from "./Customers"
 
+import { useNavigate } from "react-router-dom";
+
 const AdminDashboard = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState("dashboard")
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+    navigate("/");
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard />
+        return <Dashboard />;
       case "products":
-        return <Products />
+        return <Products />;
       case "orders":
-        return <Orders />
+        return <Orders />;
       case "customers":
-        return <Customers />
+        return <Customers />;
       default:
-        return <Dashboard />
+        return <Dashboard />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -42,7 +52,7 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <button onClick={onLogout} className="text-gray-600 hover:text-gray-900 transition-colors">
+                <button onClick={handleLogout} className="text-gray-600 hover:text-gray-900 transition-colors">
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>

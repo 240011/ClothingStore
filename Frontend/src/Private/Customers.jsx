@@ -1,14 +1,33 @@
-import React from "react"
-import { Users, Download, Eye, Edit } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { Users, Download } from "lucide-react"
+import { getUsers, deleteUser } from "../Services/userApi"
 
 const Customers = () => {
-  const [customers] = React.useState([
-    { id: 1, name: "John Doe", email: "john@example.com", orders: 5, spent: 450.25, joined: "2023-12-01" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", orders: 3, spent: 289.5, joined: "2023-11-15" },
-    { id: 3, name: "Mike Johnson", email: "mike@example.com", orders: 8, spent: 720.99, joined: "2023-10-20" },
-    { id: 4, name: "Sarah Wilson", email: "sarah@example.com", orders: 2, spent: 156.75, joined: "2024-01-05" },
-    { id: 5, name: "Tom Brown", email: "tom@example.com", orders: 6, spent: 534.8, joined: "2023-09-12" },
-  ])
+  const [customers, setCustomers] = useState([])
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await getUsers()
+        setCustomers(response.data.data)
+      } catch (error) {
+        console.error("Failed to fetch customers:", error)
+      }
+    }
+    fetchCustomers()
+  }, [])
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this customer?")) {
+      try {
+        await deleteUser(id)
+        setCustomers((prev) => prev.filter((customer) => customer.id !== id))
+      } catch (error) {
+        console.error("Failed to delete customer:", error)
+        alert("Failed to delete customer. Please try again.")
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -30,8 +49,8 @@ const Customers = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -53,16 +72,18 @@ const Customers = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.orders}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rs. {customer.spent}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.joined}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.address || "-"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{customer.phone || "-"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "-"}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-700 p-1">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="text-green-600 hover:text-green-700 p-1">
-                        <Edit className="w-4 h-4" />
+                      <button
+                        onClick={() => handleDelete(customer.id)}
+                        className="text-red-600 hover:text-red-700 p-1"
+                      >
+                        Delete
                       </button>
                     </div>
                   </td>
