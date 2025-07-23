@@ -97,7 +97,7 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
             {/* Product Image */}
             <div className="relative">
               <img
-                src={product.image || product.image_url}
+                src={product.image ? `http://localhost:3000/uploads/${product.image.split('/').pop()}` : "https://placehold.co/100"}
                 alt={product.name}
                 className="w-full h-96 lg:h-full object-cover rounded-xl"
               />
@@ -150,7 +150,7 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Size</h3>
                 <div className="flex flex-wrap gap-2">
-                  {(product.sizes || product.size || []).map((size) => (
+                  {(product.size || []).map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
@@ -170,7 +170,7 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Color</h3>
                 <div className="flex flex-wrap gap-2">
-                  {(product.colors || product.color || []).map((color) => (
+                  {(product.color || []).map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
@@ -212,15 +212,15 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               <div className="flex space-x-4">
                 <button
                   onClick={handleAddToCart}
-                  disabled={!product.inStock || product.stock === 0}
+                  disabled={product.stock === 0}
                   className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 ${
-                    (product.inStock && product.stock > 0)
+                    (product.stock > 0)
                       ? 'bg-rose-500 text-white hover:bg-rose-600'
                       : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  <span>{(product.inStock && product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
+                  <span>{(product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
                 </button>
                 
                 <button
@@ -236,7 +236,7 @@ const ProductModal = ({ product, isOpen, onClose, onToggleFavorite, isFavorite, 
               </div>
 
               {/* Stock Status */}
-              {(product.inStock && product.stock > 0) ? (
+              {(product.stock > 0) ? (
                 <p className="text-green-600 font-medium">✓ In Stock ({product.stock} available)</p>
               ) : (
                 <p className="text-red-600 font-medium">✗ Out of Stock</p>

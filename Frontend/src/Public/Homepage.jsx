@@ -1,16 +1,16 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Header from "../components/Header"
 import ProductCard from "./ProductCard"
 import ProductModal from "./ProductModal"
 import Cart from "../Private/Cart"
-import { sampleProducts } from "../data/products"
+import { getProducts } from "../Services/productService"
 import { useNavigate } from "react-router-dom"
 
 const Homepage = () => {
   const navigate = useNavigate()
 
-  const [products] = useState(sampleProducts)
-  const [filteredProducts, setFilteredProducts] = useState(sampleProducts)
+  const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState("All")
@@ -19,6 +19,19 @@ const Homepage = () => {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [showFavorites, setShowFavorites] = useState(false)
   const [visibleCount, setVisibleCount] = useState(8) // NEW
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getProducts();
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleSearch = (query) => {
     const filtered = products.filter(

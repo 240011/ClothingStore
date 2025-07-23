@@ -61,7 +61,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, is
       {/* Product Image */}
       <div className="relative overflow-hidden">
         <img
-          src={product.image || product.image_url}
+          src={product.image ? `http://localhost:3000/uploads/${product.image.split('/').pop()}` : "https://placehold.co/100"}
           alt={product.name}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -105,7 +105,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, is
             </button>
             <button
               onClick={handleAddToCart}
-              disabled={!product.inStock || product.stock === 0}
+              disabled={product.stock === 0}
               className="bg-rose-500 text-white p-2 rounded-full hover:bg-rose-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <ShoppingCart className="w-4 h-4" />
@@ -138,24 +138,19 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onToggleFavorite, is
             )}
           </div>
 
-          {(!product.inStock || product.stock === 0) && (
-            <span className="text-sm text-red-500 font-medium">
-              Out of Stock
-            </span>
-          )}
         </div>
 
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          disabled={!product.inStock || product.stock === 0}
+          disabled={product.stock === 0}
           className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-            (product.inStock && product.stock > 0)
+            (product.stock > 0)
               ? 'bg-rose-500 text-white hover:bg-rose-600'
               : 'bg-gray-200 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {(product.inStock && product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}
+          {(product.stock > 0) ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
     </div>

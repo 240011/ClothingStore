@@ -1,10 +1,15 @@
 import multer from "multer";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// ES module-safe way to get __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Set up storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Save files in the 'uploads' folder
+    cb(null, path.resolve(__dirname, "../../uploads")); // Save files in the 'uploads' folder inside backend root
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
