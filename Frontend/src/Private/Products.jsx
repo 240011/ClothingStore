@@ -12,7 +12,7 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
-    category: "T-shirt",
+    category: "T-Shirts",
     price: "",
     stock: "",
     description: "",
@@ -33,12 +33,12 @@ const Products = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const categories = ["T-shirt", "Jeans", "Accessories", "Dresses"];
+  const categories = ["T-Shirts", "Jeans", "Accessories", "Dresses"];
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await getProducts();
+      const response = await getProducts(selectedFilter === "all" ? null : selectedFilter);
       setProducts(response.data.map(product => ({
         ...product,
         status: product.stock > 15 ? "active" : product.stock > 0 ? "low-stock" : "out-of-stock",
@@ -62,7 +62,7 @@ const Products = () => {
       await createProduct(newProduct);
       fetchProducts();
       setShowAddProductModal(false);
-      setNewProduct({ name: "", category: "T-shirt", price: "", stock: "", description: "", image: null, size: [], color: [] });
+      setNewProduct({ name: "", category: "T-Shirts", price: "", stock: "", description: "", image: null, size: [], color: [] });
     } catch (err) {
       console.error("Failed to add product:", err);
     }

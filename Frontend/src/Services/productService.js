@@ -1,8 +1,9 @@
 import api from "./api";
 
-export const getProducts = async () => {
+export const getProducts = async (category) => {
   try {
-    const response = await api.get("/product");
+    const url = category ? `/product?category=${encodeURIComponent(category)}` : "/product";
+    const response = await api.get(url);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);

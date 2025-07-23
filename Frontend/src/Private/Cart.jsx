@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { getCart, updateCart, removeFromCart } from '../Services/cartService';
+import { useNavigate } from 'react-router-dom';
 
 // Utility function to calculate cart total
 const calculateTotal = (items) =>
-  items.reduce((total, item) => total + item.price * item.quantity, 0);
+  items.reduce((total, item) => total + item.product.price * item.quantity, 0);
 
 const Cart = ({
   isOpen,
@@ -13,73 +15,61 @@ const Cart = ({
   onCheckout,
   onUpdateCart, // Add this prop for updating cart from fetched data
 }) => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetch('/api/cart');
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch cart: ${response.statusText}`);
+
+  const handleCheckout = async () => {
+    try {
+      await onCheckout(cartItems, calculateTotal(cartItems));
+      navigate('/checkout');
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      setError('Checkout failed. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      if (isOpen) {
+        try {
+          setIsLoading(true);
+          setError(null);
+          const response = await getCart();
+          if (response.data && response.data.items) {
+            onUpdateCart(response.data.items);
+          }
+        } catch (err) {
+          console.error('Cart fetch error:', err);
+          setError('Unable to load your cart. Please try again later.');
+        } finally {
+          setIsLoading(false);
         }
-        
-        const data = await response.json();
-        if (data.data && data.data.items) {
-          onUpdateCart(data.data.items);
-        }
-      } catch (err) {
-        console.error('Cart fetch error:', err);
-        setError('Unable to load your cart. Please try again later.');
-      } finally {
-        setIsLoading(false);
       }
     };
-    fetchCart();
-  }, [onUpdateCart]);
+    fetchCartData();
+  }, [isOpen, onUpdateCart]);
+
   const handleUpdateQuantity = async (index, newQuantity) => {
     try {
-      setIsLoading(true);
       const updatedItems = cartItems.map((item, i) =>
         i === index ? { ...item, quantity: newQuantity } : item
       );
-      await fetch('/api/cart', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: updatedItems,
-          total: calculateTotal(updatedItems),
-        }),
-      });
+      await updateCart(updatedItems);
       onUpdateQuantity(index, newQuantity);
     } catch (err) {
       console.error(err);
       setError('Failed to update quantity');
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleRemoveItem = async (index) => {
+  const handleRemoveItem = async (itemId, index) => {
     try {
-      setIsLoading(true);
-      const updatedItems = cartItems.filter((_, i) => i !== index);
-      await fetch('/api/cart', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: updatedItems,
-          total: calculateTotal(updatedItems),
-        }),
-      });
+      await removeFromCart(itemId);
       onRemoveItem(index);
     } catch (err) {
       console.error(err);
       setError('Failed to remove item');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -110,7 +100,7 @@ useEffect(() => {
             {cartItems.map((item, index) => (
               <div key={index} className="flex items-center gap-4 py-4 border-b border-gray-200">
                 <img
-                  src={item.product.image || item.product.image_url}
+                  src={item.product.image ? `http://localhost:3000/uploads/${item.product.image.split('/').pop()}` : "https://placehold.co/100"}
                   alt={item.product.name}
                   className="w-20 h-20 object-cover rounded"
                 />
@@ -140,7 +130,7 @@ useEffect(() => {
                     Rs. {item.product.price * item.quantity}
                   </p>
                   <button
-                    onClick={() => onRemoveItem(index)}
+                    onClick={() => handleRemoveItem(item.id, index)}
                     className="text-sm text-red-500 hover:text-red-700"
                   >
                     Remove
@@ -158,7 +148,7 @@ useEffect(() => {
               </span>
             </div>
             <button
-              onClick={() => onCheckout(cartItems, cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0))}
+              onClick={handleCheckout}
               disabled={cartItems.length === 0}
               className="w-full bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-700 disabled:bg-gray-300"
             >
