@@ -27,5 +27,5 @@ export const Cart = sequelize.define("Cart", {
   }
 });
 // Establish relationship with User
-Cart.belongsTo(User);
-User.hasOne(Cart);
+Cart.belongsTo(User, { foreignKey: 'userId' });
+User.hasOne(Cart, { foreignKey: 'userId' });

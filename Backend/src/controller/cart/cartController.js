@@ -22,7 +22,7 @@ const getCart = async (req, res) => {
 };
 const updateCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.user.id;
     const { items, total } = req.body;
     const [cart] = await Cart.findOrCreate({
       where: { userId },

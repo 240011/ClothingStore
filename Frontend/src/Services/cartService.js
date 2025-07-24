@@ -33,11 +33,11 @@ export const addToCart = async (item) => {
   }
 };
 
-export const updateCart = async (items) => {
+export const updateCart = async (items, total) => {
   try {
     const response = await api.put(
       "/cart",
-      { items },
+      { items, total },
       {
         headers: {
           ...getAuthHeader(),

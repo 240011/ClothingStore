@@ -73,7 +73,8 @@ const Cart = ({
       const updatedItems = cartItems.map((item, i) =>
         i === index ? { ...item, quantity: newQuantity } : item
       );
-      await updateCart(updatedItems);
+      const total = calculateTotal(updatedItems);
+      await updateCart(updatedItems, total);
       onUpdateQuantity(index, newQuantity);
     } catch (err) {
       console.error(err);
