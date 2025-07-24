@@ -1,14 +1,18 @@
 import { Cart } from '../../models/index.js';
 const getCart = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
+    console.log('User in getCart:', req.user);
+    if (!req.user || !req.user.user || !req.user.user.id) {
       return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
     }
-    const userId = req.user.id;
-    const cart = await Cart.findOne({ where: { userId } });
+    const userId = req.user.user.id;
+    console.log('Fetching cart for userId:', userId);
+    let cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
-      return res.status(200).json({ data: { items: [] } });
+      console.log('No cart found for userId:', userId, 'Creating new cart');
+      cart = await Cart.create({ userId, items: [], total: 0 });
     }
+    console.log('Cart found or created:', cart.toJSON());
     res.status(200).json({ data: cart.toJSON() });
   } catch (error) {
     console.error('Error in getCart:', error);

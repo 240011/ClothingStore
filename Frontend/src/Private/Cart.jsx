@@ -9,29 +9,38 @@ const calculateTotal = (items) =>
 const Cart = ({
   isOpen,
   onClose,
-  cartItems,
+  cartItems = [],
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
-  onUpdateCart, // Add this prop for updating cart from fetched data
+  onUpdateCart,
 }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleCheckout = async () => {
-    try {
-      await onCheckout(cartItems, calculateTotal(cartItems));
-      navigate('/checkout');
-    } catch (error) {
-      console.error('Checkout failed:', error);
-      setError('Checkout failed. Please try again.');
-    }
-  };
+ const handleCheckout = async () => {
+  try {
+    const total = calculateTotal(cartItems);
+    alert(`Checkout initiated for ${cartItems.length} items. Total: Rs. ${total.toFixed(2)}`);
+    await onCheckout(cartItems, total);
+    navigate('/checkout');
+  } catch (error) {
+    console.error('Checkout failed:', error);
+    setError('Checkout failed. Please try again.');
+  }
+};
 
   useEffect(() => {
     const fetchCartData = async () => {
       if (isOpen) {
+        const token = localStorage.getItem('authToken');
+        console.log('Auth token:', token);
+        if (!token) {
+          setError('Please login to view your cart.');
+          setIsLoading(false);
+          return;
+        }
         try {
           setIsLoading(true);
           setError(null);
@@ -41,7 +50,15 @@ const Cart = ({
           }
         } catch (err) {
           console.error('Cart fetch error:', err);
-          setError('Unable to load your cart. Please try again later.');
+          if (err.response) {
+            console.error('Error response status:', err.response.status);
+            console.error('Error response data:', err.response.data);
+          }
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            setError('Please login to view your cart.');
+          } else {
+            setError('Unable to load your cart. Please try again later.');
+          }
         } finally {
           setIsLoading(false);
         }
@@ -51,6 +68,7 @@ const Cart = ({
   }, [isOpen, onUpdateCart]);
 
   const handleUpdateQuantity = async (index, newQuantity) => {
+    if (newQuantity <= 0) return; // prevent zero or negative quantity
     try {
       const updatedItems = cartItems.map((item, i) =>
         i === index ? { ...item, quantity: newQuantity } : item
@@ -81,44 +99,47 @@ const Cart = ({
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">Shopping Cart</h2>
-              <button
-                onClick={onClose}
-                className="p-2 text-gray-500 hover:text-gray-700"
-              >
+              <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-700">
                 ×
               </button>
             </div>
           </div>
+
           {/* Cart Content */}
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading && <p className="text-center py-4">Loading...</p>}
             {error && <p className="text-center py-4 text-red-500">{error}</p>}
-            
+
             {!isLoading && !error && cartItems.length === 0 && (
               <p className="text-center py-4 text-gray-500">Your cart is empty</p>
             )}
+
             {cartItems.map((item, index) => (
-              <div key={index} className="flex items-center gap-4 py-4 border-b border-gray-200">
+              <div key={item.id || index} className="flex items-center gap-4 py-4 border-b border-gray-200">
                 <img
-                  src={item.product.image ? `http://localhost:3000/uploads/${item.product.image.split('/').pop()}` : "https://placehold.co/100"}
+                  src={
+                    item.product.image
+                      ? `http://localhost:3000/uploads/${item.product.image.split('/').pop()}`
+                      : 'https://placehold.co/100'
+                  }
                   alt={item.product.name}
                   className="w-20 h-20 object-cover rounded"
                 />
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{item.product.name}</h3>
                   <p className="text-sm text-gray-500">
-                    Size: {item.selectedSize}, Color: {item.selectedColor}
+                    Size: {item.selectedSize || 'N/A'}, Color: {item.selectedColor || 'N/A'}
                   </p>
                   <div className="flex items-center mt-2">
                     <button
-                      onClick={() => onUpdateQuantity(index, item.quantity - 1)}
+                      onClick={() => handleUpdateQuantity(index, item.quantity - 1)}
                       className="p-1 text-gray-500 hover:text-gray-700"
                     >
                       -
                     </button>
                     <span className="mx-2">{item.quantity}</span>
                     <button
-                      onClick={() => onUpdateQuantity(index, item.quantity + 1)}
+                      onClick={() => handleUpdateQuantity(index, item.quantity + 1)}
                       className="p-1 text-gray-500 hover:text-gray-700"
                     >
                       +
@@ -126,9 +147,6 @@ const Cart = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-gray-900">
-                    Rs. {item.product.price * item.quantity}
-                  </p>
                   <button
                     onClick={() => handleRemoveItem(item.id, index)}
                     className="text-sm text-red-500 hover:text-red-700"
@@ -139,12 +157,13 @@ const Cart = ({
               </div>
             ))}
           </div>
+
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
             <div className="flex justify-between mb-4">
               <span className="font-medium text-gray-900">Total</span>
               <span className="font-bold text-gray-900">
-                Rs. {cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)}
+                Rs. {calculateTotal(cartItems)}
               </span>
             </div>
             <button

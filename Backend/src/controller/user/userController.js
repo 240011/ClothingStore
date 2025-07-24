@@ -133,7 +133,7 @@ import bcrypt from 'bcrypt';
 const create = async (req, res) => {
     try {
         const body = req.body
-        console.log(req.body)
+        console.log("Create user request body:", req.body)
         
         //validation for required fields
         if (!body?.email || !body?.name || !body?.password) {
@@ -155,10 +155,12 @@ const create = async (req, res) => {
             gender: body.gender || null,
             password: hashedPassword
         });
+
+        console.log("User created successfully:", users)
         
         res.status(201).send({ data: users, message: "successfully created user" })
     } catch (e) {
-        console.log(e)
+        console.error("Error creating user:", e)
         res.status(500).json({ error: 'Failed to create user' });
     }
 }
@@ -233,11 +235,13 @@ const getById = async (req, res) => {
         console.log("getById called with id:", id);
         const user = await User.findOne({ where: { id } })
         if (!user) {
+            console.log("User not found for id:", id);
             return res.status(404).send({ message: "User not found" });
         }
+        console.log("User fetched successfully:", user);
         res.status(200).send({ message: "user fetched successfully", data: user })
     } catch (e) {
-        console.log("Error in getById:", e)
+        console.error("Error in getById:", e)
         res.status(500).json({ error: 'Failed to fetch user' });
     }
 }
