@@ -81,5 +81,32 @@ const addToCart = async (req, res) => {
 export const cartController = {
   getCart,
   updateCart,
-  addToCart
+  addToCart,
+
+  removeFromCart: async (req, res) => {
+    try {
+      const userId = req.user.user.id;
+      const itemId = req.params.itemId;
+      const cart = await Cart.findOne({ where: { userId } });
+      if (!cart) {
+        return res.status(404).json({ error: 'Cart not found' });
+      }
+      let items = cart.items || [];
+      // Remove item by itemId
+      items = items.filter(item => item.id !== itemId);
+      // Recalculate total
+      const total = items.reduce((acc, curr) => {
+        const price = parseFloat(curr.price) || 0;
+        const quantity = parseInt(curr.quantity) || 1;
+        return acc + price * quantity;
+      }, 0);
+      cart.items = items;
+      cart.total = total.toFixed(2);
+      await cart.save();
+      res.status(200).json({ data: cart });
+    } catch (error) {
+      console.error('Error in removeFromCart:', error);
+      res.status(500).json({ error: 'Failed to remove item from cart' });
+    }
+  }
 };
