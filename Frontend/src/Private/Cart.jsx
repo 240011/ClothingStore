@@ -24,7 +24,7 @@ const Cart = ({
     const total = calculateTotal(cartItems);
     alert(`Checkout initiated for ${cartItems.length} items. Total: Rs. ${total.toFixed(2)}`);
     await onCheckout(cartItems, total);
-    navigate('/checkout');
+    navigate('/');
   } catch (error) {
     console.error('Checkout failed:', error);
     setError('Checkout failed. Please try again.');
@@ -57,7 +57,7 @@ const Cart = ({
           if (err.response && (err.response.status === 401 || err.response.status === 403)) {
             setError('Please login to view your cart.');
           } else {
-            setError('Unable to load your cart. Please try again later.');
+            setError('');
           }
         } finally {
           setIsLoading(false);
