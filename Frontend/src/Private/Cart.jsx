@@ -23,7 +23,10 @@ const Cart = ({
   try {
     const total = calculateTotal(cartItems);
     alert(`Checkout initiated for ${cartItems.length} items. Total: Rs. ${total.toFixed(2)}`);
-    await onCheckout(cartItems, total);
+    // Call updateCart API directly here to ensure backend is updated
+    await updateCart(cartItems, total);
+    // Save cart data to localStorage after checkout
+    localStorage.setItem('cartAfterCheckout', JSON.stringify(cartItems));
     navigate('/');
   } catch (error) {
     console.error('Checkout failed:', error);

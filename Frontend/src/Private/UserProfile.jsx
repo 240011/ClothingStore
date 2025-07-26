@@ -16,37 +16,73 @@ const UserProfile = () => {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [userId, setUserId] = useState(localStorage.getItem("userId"))
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userId = localStorage.getItem("userId")
-        if (!userId) {
-          setError("User not logged in")
-          setLoading(false)
-          return
-        }
-
-        const response = await getUserById(userId)
-        const userData = response.data.data
-
-        setUserInfo({
-          name: userData.name || "",
-          gender: userData.gender || "",
-          email: userData.email || "",
-          mobile: userData.phone || "",
-          address: userData.address || "",
-        })
-        setLoading(false)
-      } catch (err) {
-        console.error("Error fetching user data:", err)
-        setError("Failed to fetch user data")
-        setLoading(false)
+    const handleStorageChange = (event) => {
+      if (event.key === "userId") {
+        setUserId(event.newValue)
       }
     }
-
-    fetchUserData()
+    window.addEventListener("storage", handleStorageChange)
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+    }
   }, [])
+
+  // Poll localStorage for userId changes every 2 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const currentUserId = localStorage.getItem("userId")
+      setUserId((prevUserId) => {
+        if (prevUserId !== currentUserId) {
+          return currentUserId
+        }
+        return prevUserId
+      })
+    }, 2000)
+    return () => clearInterval(intervalId)
+  }, [])
+
+  const fetchUserData = async () => {
+    console.log("Fetching user data for userId:", userId)
+    const token = localStorage.getItem("authToken")
+    console.log("Using authToken:", token)
+    if (!token) {
+      setError("User not authenticated")
+      setLoading(false)
+      return
+    }
+    if (!userId) {
+      setError("User not logged in")
+      setLoading(false)
+      return
+    }
+    try {
+      const response = await getUserById(userId)
+      console.log("User data response:", response)
+      const userData = response.data.data
+
+      setUserInfo({
+        name: userData.name || "",
+        gender: userData.gender || "",
+        email: userData.email || "",
+        mobile: userData.phone || "",
+        address: userData.address || "",
+      })
+      setLoading(false)
+      setError(null)
+    } catch (err) {
+      console.error("Error fetching user data:", err)
+      setError("Failed to fetch user data")
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    setLoading(true)
+    fetchUserData()
+  }, [userId])
 
   const handleInputChange = (field, value) => {
     setUserInfo((prev) => ({
@@ -58,6 +94,11 @@ const UserProfile = () => {
   const handleEdit = () => setIsEditing(true)
 
   const handleSave = async () => {
+    const token = localStorage.getItem("authToken")
+    if (!token) {
+      alert("User not authenticated")
+      return
+    }
     try {
       const userId = localStorage.getItem("userId")
       if (!userId) {
@@ -76,6 +117,9 @@ const UserProfile = () => {
       await updateUser(userId, updateData)
       alert("Profile saved successfully")
       setIsEditing(false)
+      // Refetch user data after save to update the profile view
+      setLoading(true)
+      await fetchUserData()
     } catch (error) {
       console.error("Failed to update profile:", error)
       alert("Failed to save profile. Please try again.")
