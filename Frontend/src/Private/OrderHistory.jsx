@@ -22,56 +22,49 @@ const OrderHistory = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false)
   const [filterStatus, setFilterStatus] = useState("All")
 
-  let cartItems = []
-  try {
-    const context = useContext(CartContext)
-    cartItems = context?.cartItems || []
-  } catch (error) {
-    console.error("Failed to get cartItems from CartContext:", error)
-  }
+  const [cartItems, setCartItems] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const sampleOrders = []
 
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    try {
+    const fetchCartData = async () => {
       const token = localStorage.getItem("authToken")
-      const userEmail = localStorage.getItem("userEmail")
-      const userType = localStorage.getItem("userType")
-
-      if (!token || !userEmail) {
-        navigate("/signup")
+      if (!token) {
+        setError("Please login to view your cart.")
+        setIsLoading(false)
         return
       }
-
-      setCurrentUser({ email: userEmail, type: userType })
-
-      const savedOrders = localStorage.getItem(`orders_${userEmail}`)
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders))
-      } else {
-        setOrders(sampleOrders)
-        localStorage.setItem(`orders_${userEmail}`, JSON.stringify(sampleOrders))
-      }
-
-      // Load cart data saved after checkout
-      const cartAfterCheckout = localStorage.getItem('cartAfterCheckout')
-      if (cartAfterCheckout) {
-        try {
-          const parsedCart = JSON.parse(cartAfterCheckout)
-          if (parsedCart && parsedCart.length > 0) {
-            // Optionally, you can merge or replace orders with cart data here
-            // For now, just log or handle as needed
-            console.log('Loaded cart data after checkout:', parsedCart)
+      try {
+        setIsLoading(true)
+        setError(null)
+        const response = await fetch("http://localhost:3000/cart", {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data && data.data && data.data.items) {
+            setCartItems(data.data.items)
           }
-        } catch (err) {
-          console.error('Failed to parse cartAfterCheckout:', err)
+        } else {
+          setError("Failed to fetch cart data")
         }
+      } catch (error) {
+        console.error("Error in fetchCartData:", error)
+        setError("Failed to fetch cart data")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Error in useEffect:", error)
     }
+
+    fetchCartData()
   }, [navigate])
 
   const getStatusIcon = (status) => {
@@ -84,6 +77,97 @@ const OrderHistory = () => {
         return <CheckCircle className="w-5 h-5 text-green-500" />
       default:
         return <Package className="w-5 h-5 text-gray-500" />
+    }
+  }
+
+  const calculateTotal = (items) =>
+    items.reduce((total, item) => total + parseFloat(item.price) * parseInt(item.quantity), 0)
+
+  const handleUpdateQuantity = async (index, newQuantity) => {
+    if (newQuantity <= 0) return
+    try {
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        setError("Please login to update cart.")
+        return
+      }
+      const updatedItems = cartItems.map((item, i) =>
+        i === index ? { ...item, quantity: newQuantity } : item
+      )
+      const total = calculateTotal(updatedItems)
+      const response = await fetch("http://localhost:3000/cart", {
+        method: "PUT",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items: updatedItems, total }),
+      })
+      if (response.ok) {
+        setCartItems(updatedItems)
+        setError(null)
+      } else {
+        setError("Failed to update cart")
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error)
+      setError("Failed to update cart")
+    }
+  }
+
+  const handleRemoveItem = async (itemId, index) => {
+    try {
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        setError("Please login to update cart.")
+        return
+      }
+      const response = await fetch(`http://localhost:3000/cart/${itemId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      })
+      if (response.ok) {
+        const updatedItems = cartItems.filter((_, i) => i !== index)
+        setCartItems(updatedItems)
+        setError(null)
+      } else {
+        setError("Failed to remove item")
+      }
+    } catch (error) {
+      console.error("Error removing item:", error)
+      setError("Failed to remove item")
+    }
+  }
+
+  const handleCheckout = async () => {
+    try {
+      const total = calculateTotal(cartItems)
+      alert(`Checkout initiated for ${cartItems.length} items. Total: $${total.toFixed(2)}`)
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        setError("Please login to checkout.")
+        return
+      }
+      const response = await fetch("http://localhost:3000/cart/checkout", {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items: cartItems, total }),
+      })
+      if (response.ok) {
+        alert("Checkout successful!")
+        setCartItems([])
+        setError(null)
+      } else {
+        setError("Checkout failed. Please try again.")
+      }
+    } catch (error) {
+      console.error("Checkout error:", error)
+      setError("Checkout failed. Please try again.")
     }
   }
 
@@ -151,13 +235,19 @@ const OrderHistory = () => {
         </div>
 
         {/* Cart Data Section */}
+        {error && (
+          <div className="text-red-500 mb-4 text-center">{error}</div>
+        )}
+        {isLoading && (
+          <div className="text-center mb-4">Loading cart data...</div>
+        )}
         {cartItems.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm mb-6 p-6">
             <h2 className="text-2xl font-semibold mb-4">Current Cart Items</h2>
             <div className="space-y-4">
-              {cartItems.map((item) => (
+              {cartItems.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={item.id || index}
                   className="flex items-center space-x-4 border p-3 rounded-lg"
                 >
                   <img
@@ -168,13 +258,54 @@ const OrderHistory = () => {
                   <div className="flex-1">
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity}
+                      Size: {item.selectedSize || "N/A"}, Color:{" "}
+                      {item.selectedColor || "N/A"}
                     </p>
+                    <div className="flex items-center mt-2">
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(index, item.quantity - 1)
+                        }
+                        className="p-1 text-gray-500 hover:text-gray-700"
+                      >
+                        -
+                      </button>
+                      <span className="mx-2">{item.quantity}</span>
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(index, item.quantity + 1)
+                        }
+                        className="p-1 text-gray-500 hover:text-gray-700"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                  <p className="font-medium">${item.price.toFixed(2)}</p>
+                  <div className="text-right">
+                    <p className="font-medium">${parseFloat(item.price).toFixed(2)}</p>
+                    <button
+                      onClick={() => handleRemoveItem(item.id, index)}
+                      className="text-sm text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
+            <div className="mt-6 flex justify-between items-center">
+              <span className="font-medium text-gray-900">Total</span>
+              <span className="font-bold text-gray-900">
+                ${calculateTotal(cartItems).toFixed(2)}
+              </span>
+            </div>
+            <button
+              onClick={handleCheckout}
+              disabled={cartItems.length === 0}
+              className="mt-4 w-full bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-700 disabled:bg-gray-300"
+            >
+              Proceed to Checkout
+            </button>
           </div>
         )}
 

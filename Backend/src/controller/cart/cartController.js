@@ -7,6 +7,13 @@ const getCart = async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
     }
     const userId = req.user.user.id;
+
+    // If admin user, return all carts
+    if (userId === "admin") {
+      const allCarts = await Cart.findAll();
+      return res.status(200).json({ data: allCarts });
+    }
+
     console.log('Fetching cart for userId:', userId);
     let cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
