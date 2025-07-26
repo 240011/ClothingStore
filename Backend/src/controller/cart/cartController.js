@@ -11,7 +11,14 @@ const getCart = async (req, res) => {
     // If admin user, return all carts
     if (userId === "admin") {
       const allCarts = await Cart.findAll();
-      return res.status(200).json({ data: allCarts });
+      // Flatten all items from all carts for admin
+      const allItems = allCarts.reduce((acc, cart) => {
+        if (cart.items && Array.isArray(cart.items)) {
+          acc = acc.concat(cart.items);
+        }
+        return acc;
+      }, []);
+      return res.status(200).json({ data: { items: allItems } });
     }
 
     console.log('Fetching cart for userId:', userId);
