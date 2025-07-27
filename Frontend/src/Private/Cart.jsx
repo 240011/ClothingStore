@@ -19,27 +19,26 @@ const Cart = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
- const handleCheckout = async () => {
-  try {
-    const total = calculateTotal(cartItems);
-    alert(`Checkout initiated for ${cartItems.length} items. Total: Rs. ${total.toFixed(2)}`);
-    
-    // Call updateCart API directly here to ensure backend is updated
-    await updateCart(cartItems, total);
-    // Save cart data to localStorage after checkout
-    localStorage.setItem('cartAfterCheckout', JSON.stringify(cartItems));
-    navigate('/');
-  } catch (error) {
-    console.error('Checkout failed:', error);
-    setError('Checkout failed. Please try again.');
-  }
-};
+  const handleCheckout = async () => {
+    try {
+      const total = calculateTotal(cartItems);
+      alert(`Checkout initiated for ${cartItems.length} items. Total: Rs. ${total.toFixed(2)}`);
+
+      await updateCart(cartItems, total);
+      localStorage.setItem('cartAfterCheckout', JSON.stringify(cartItems));
+
+      onClose(); // Close the cart
+      navigate('/');
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      setError('Checkout failed. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const fetchCartData = async () => {
       if (isOpen) {
         const token = localStorage.getItem('authToken');
-        console.log('Auth token:', token);
         if (!token) {
           setError('Please login to view your cart.');
           setIsLoading(false);
@@ -54,10 +53,6 @@ const Cart = ({
           }
         } catch (err) {
           console.error('Cart fetch error:', err);
-          if (err.response) {
-            console.error('Error response status:', err.response.status);
-            console.error('Error response data:', err.response.data);
-          }
           if (err.response && (err.response.status === 401 || err.response.status === 403)) {
             setError('Please login to view your cart.');
           } else {
@@ -72,7 +67,7 @@ const Cart = ({
   }, [isOpen, onUpdateCart]);
 
   const handleUpdateQuantity = async (index, newQuantity) => {
-    if (newQuantity <= 0) return; // prevent zero or negative quantity
+    if (newQuantity <= 0) return;
     try {
       const updatedItems = cartItems.map((item, i) =>
         i === index ? { ...item, quantity: newQuantity } : item
