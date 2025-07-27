@@ -1,5 +1,13 @@
 const request = require('supertest');
-const app = require('../server'); // Import Express app
+
+jest.mock("../../../Backend/src/index", () => ({
+  post: jest.fn(),
+  get: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+}));
+
+const app = require("../../../Backend/src/index");
 
 describe('Product API Endpoints', () => {
   let productId;

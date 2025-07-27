@@ -45,8 +45,12 @@ app.use("/api/file", uploadRoutes);
 // Create uploads folder if it doesn't exist
 createUploadsFolder();
 
-// Start the server and connect to the database
-app.listen(3000, function () {
-  console.log(`Project running on port 3000`);
-  db();
-});
+if (process.env.NODE_ENV !== 'test') {
+  // Start the server and connect to the database
+  app.listen(3000, function () {
+    console.log(`Project running on port 3000`);
+    db();
+  });
+}
+
+export default app;

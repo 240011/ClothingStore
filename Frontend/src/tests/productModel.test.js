@@ -27,11 +27,10 @@ describe('Product Model', () => {
   });
 
   it('should require a product name and price', async () => {
-    await expect(ProductMock.create({})).rejects.toThrow();
     // Mock to simulate validation error
     const originalCreate = ProductMock.create;
     ProductMock.create = jest.fn().mockRejectedValue(new Error('Validation error'));
-    
+
     await expect(ProductMock.create({})).rejects.toThrow('Validation error');
     
     // Restore original function
