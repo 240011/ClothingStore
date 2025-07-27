@@ -36,10 +36,7 @@ const Customers = () => {
           <h2 className="text-2xl font-bold text-gray-900">Customers</h2>
           <p className="text-gray-600">Manage customer relationships</p>
         </div>
-        <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2">
-          <Download className="w-4 h-4" />
-          <span>Export Customers</span>
-        </button>
+        
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

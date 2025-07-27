@@ -58,10 +58,7 @@ const Orders = () => {
           <h2 className="text-2xl font-bold text-gray-900">Cart Items</h2>
           <p className="text-gray-600">List of all items across user carts</p>
         </div>
-        <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-          <Download className="w-4 h-4" />
-          <span>Export Data</span>
-        </button>
+        
       </div>
 
       <div className="mt-8">
