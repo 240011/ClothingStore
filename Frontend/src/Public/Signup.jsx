@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { User, Lock, Mail, Phone, Home, X, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react"
 import axios from "axios"
-import { createUser  } from "../Services/userApi"
+import { createUser } from "../Services/userApi"
 import DataTable from "./DataTable"
 
 const Signup = () => {
@@ -35,9 +35,10 @@ const Signup = () => {
   }, [])
 
   const handleInputChange = (field, value) => {
+    const newValue = field === "email" ? value.toLowerCase() : value
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: newValue,
     }))
     if (state.message) setState({ message: "", success: false, errors: {} })
   }
@@ -55,8 +56,7 @@ const Signup = () => {
     try {
       const { name, email, phone, address, gender, password } = formData
 
-      // CreateUser API call
-      const response = await createUser ({
+      const response = await createUser({
         name,
         email,
         password,
@@ -65,10 +65,8 @@ const Signup = () => {
         gender,
       })
 
-      // Save userId to localStorage
       localStorage.setItem("userId", response.data.data.id)
 
-      // Update userData state with new user from backend response
       setUserData((prevData) => [...prevData, response.data.data])
 
       setFormData({
@@ -83,7 +81,6 @@ const Signup = () => {
       setState({ message: "Account created successfully!", success: true, errors: {} })
       setPending(false)
 
-      // Navigate to user profile page after successful registration
       setTimeout(() => navigate("/userlogin"), 1000)
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message || "Registration failed. Please try again."
@@ -92,7 +89,7 @@ const Signup = () => {
     }
   }
 
-  const handleDeleteUser  = async (index) => {
+  const handleDeleteUser = async (index) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         const userToDelete = userData[index]
@@ -109,7 +106,6 @@ const Signup = () => {
 
   const handleClearAllData = () => {
     if (window.confirm("Are you sure you want to clear all registered users? This action cannot be undone.")) {
-      // Optionally, implement backend API to delete all users if needed
       setUserData([])
       setState({ message: "All user data cleared successfully.", success: true, errors: {} })
     }
@@ -118,7 +114,6 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <Link
             to="/"
@@ -129,11 +124,10 @@ const Signup = () => {
           </Link>
         </div>
 
-        {/* Signup Form */}
         <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <User  className="w-8 h-8 text-white" />
+              <User className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
             <p className="text-gray-600 mt-2">Join TrendMandu and start shopping</p>
@@ -155,78 +149,62 @@ const Signup = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Full Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <div className="relative">
-                  <User  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     id="name"
-                    name="name"
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                     placeholder="John Doe"
                   />
                 </div>
               </div>
 
-              {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     id="email"
-                    name="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                     placeholder="john@example.com"
                   />
                 </div>
               </div>
 
-              {/* Phone */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     id="phone"
-                    name="phone"
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                    className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                     placeholder="9842123456"
                   />
                 </div>
               </div>
 
-              {/* Gender */}
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
-                  Gender
-                </label>
+                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
                 <select
                   id="gender"
-                  name="gender"
                   required
                   value={formData.gender}
                   onChange={(e) => handleInputChange("gender", e.target.value)}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                 >
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
@@ -236,42 +214,34 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Address */}
             <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                Address
-              </label>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Address</label>
               <div className="relative">
                 <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   id="address"
-                  name="address"
                   type="text"
                   required
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
-                  className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                  className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                   placeholder="Kathmandu, Nepal"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     id="password"
-                    name="password"
                     type={showPassword ? "text" : "password"}
                     required
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    className="pl-10 pr-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                    className="pl-10 pr-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                     placeholder="Create a strong password"
                   />
                   <button
@@ -284,21 +254,17 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     id="confirmPassword"
-                    name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    className="pl-10 pr-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors text-sm"
+                    className="pl-10 pr-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 text-sm"
                     placeholder="Confirm your password"
                   />
                   <button
@@ -315,7 +281,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={pending}
-              className="w-full bg-gradient-to-r from-rose-500 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all duration-200 font-medium text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-rose-500 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all font-medium text-sm flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {pending ? (
                 <>
@@ -324,13 +290,13 @@ const Signup = () => {
                 </>
               ) : (
                 <>
-                  <User  className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                   <span>Create Account</span>
                 </>
               )}
             </button>
 
-             <div className="text-center">
+            <div className="text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link to="/userlogin" className="text-rose-600 hover:text-rose-700 font-medium">
@@ -345,7 +311,6 @@ const Signup = () => {
           </form>
         </div>
 
-        {/* Data Management */}
         {userData.length > 0 && (
           <div className="mb-6 flex justify-end">
             <button
@@ -358,7 +323,7 @@ const Signup = () => {
           </div>
         )}
 
-        <DataTable userData={userData} onDeleteUser ={handleDeleteUser } />
+        <DataTable userData={userData} onDeleteUser={handleDeleteUser} />
       </div>
     </div>
   )
